@@ -32,7 +32,6 @@ def tempday(modo):
 
             artemp.write('0')
 
-
 def data_atual():
 
     return int(str(datetime.date.today()).replace("-",""))
@@ -61,7 +60,6 @@ def checador_diario():
             salvar()
             tempday(3)
             
-
 temporizador = threading.Thread(target=checador_diario, daemon = True)
 
 def salvar():
@@ -96,18 +94,41 @@ async def on_message(message):
     
     if str(message.channel) == 'cccp' and message.author != client.user:
 
-        if 'slava' in message.content:
+        try:
+            if 'slava' in message.content:
 
-            await message.channel.send("Viva a Rússia")
+                await message.channel.send("Viva a Rússia")
 
-        elif 'hoje' in message.content:
-            
-            await message.channel.send(f'Foram registradas {tempday(2)}!')
+            elif 'hoje' in message.content:
+                
+                await message.channel.send(f'Foram registradas {tempday(2)}!')
 
-        elif message.content.startswith('teste'):
-            print(type(message.content))
-            print(message.content)
-            
+            elif message.content.startswith('atras'):
+
+                
+                if len(message.content) == 7:
+
+                    diaat = int(message.content[6])
+                
+                elif len(message.content) == 8:
+
+                    diaat = int(message.content[6] + message.content[7])
+
+                if diaat > len(ler()):
+                    await message.channel.send('Não temos registros dessa data')
+                
+                else:
+                    atmen = ler()
+                    atmen = ler()[len(atmen)-diaat][1]
+                    
+                    await message.channel.send(f'foram registradas {atmen} mensagens {diaat} dias atrás')
+        except:
+            await message.channel.send('Você digitou errado, camarada!\nDigite "ajuda" para ver os comandos disponiveis!')
+
+    
+    #elif str(message.channel) == 'escriba-javâliano' and message.author.id == 647455830530326533:
+        #await message.channel.send('Viva a Rússia, seu yanke imperialista')
+    
     else:
         
         return
