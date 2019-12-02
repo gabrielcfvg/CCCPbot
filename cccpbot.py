@@ -8,6 +8,31 @@ client = discord.Client()
 men_hoje = 0
 
 
+def tempday(modo):
+
+    if modo == 1:
+
+        temp = int(tempday(2))
+        
+        with open('tempday.txt', 'w') as artemp:
+
+            artemp.write(str(1 + temp))
+        
+
+    elif modo == 2:
+
+        with open('tempday.txt', 'r') as artemp:
+            A = artemp.read()
+            
+            return A
+    
+    elif modo == 3:
+
+        with open('tempday.txt', 'w') as artemp:
+
+            artemp.write('0')
+
+
 def data_atual():
 
     return int(str(datetime.date.today()).replace("-",""))
@@ -26,20 +51,23 @@ def checador_diario():
                 
                 time.sleep(60)
             
-            #salvar data
+            salvar()
+            tempday(3)
             dia1 = False
             
         while True:
 
             time.sleep(86400)
-            men_hoje = 0
-            #salvar data
+            salvar()
+            tempday(3)
+            
+
 temporizador = threading.Thread(target=checador_diario, daemon = True)
 
 def salvar():
     global men_hoje
     with open('cccp.csv', 'a') as arquivo:
-        arquivo.write('\n' + str(data_atual()) + ',' + str(men_hoje))
+        arquivo.write('\n' + str(data_atual()) + ',' + str(tempday(2)))
         arquivo.close()
 
 def ler():
@@ -49,7 +77,7 @@ def ler():
         arquivo.close()
         return saida
 
-        
+
 #====================================================================================================================================================================
 
 temporizador.start()
@@ -63,9 +91,8 @@ async def on_ready():
 @client.event
 async def on_message(message):
 
-    global men_hoje
 
-    men_hoje += 1
+    tempday(1)
     
     if str(message.channel) == 'cccp' and message.author != client.user:
 
@@ -75,7 +102,7 @@ async def on_message(message):
 
         elif 'hoje' in message.content:
             
-            await message.channel.send(f'Foram registradas {men_hoje}!')
+            await message.channel.send(f'Foram registradas {tempday(2)}!')
 
         elif message.content.startswith('teste'):
             print(type(message.content))
