@@ -122,6 +122,10 @@ async def on_message(message):
                     atmen = ler()[len(atmen)-diaat][1]
                     
                     await message.channel.send(f'foram registradas {atmen} mensagens {diaat} dias atrás')
+
+            elif message.content.startswith('ajuda'):
+
+                await message.channel.send('Comandos do Bot\n"slava" = o bot responde "Viva a Rússia", usado para fins de teste.\n"hoje" = diz o numero de mensagens postada até o momento atual no dia de hoje.\n"atras" = esse comado, quando acompanhado de um numero, diz quantas mensagens foram mandadas no dia em especifico,"atras 1" irá mostrar o numero de mensagens postadas ontem.')
         except:
             await message.channel.send('Você digitou errado, camarada!\nDigite "ajuda" para ver os comandos disponiveis!')
 
