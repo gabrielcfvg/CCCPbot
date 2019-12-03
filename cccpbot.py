@@ -46,26 +46,28 @@ def checador_diario():
     while True:
         
         while (dia1 == True):
-            while (hora_atual() >= 000 or hora_atual() <= 10):
+            while (hora_atual() > 10):
                 
-                time.sleep(60)
+                time.sleep(30)
             
             salvar()
             tempday(3)
             dia1 = False
+            print('passou o dia')
             
         while True:
-
+            
             time.sleep(86400)
             salvar()
             tempday(3)
-            
+            print('passou o dia')
+
 temporizador = threading.Thread(target=checador_diario, daemon = True)
 
 def salvar():
     global men_hoje
     with open('cccp.csv', 'a') as arquivo:
-        arquivo.write('\n' + str(data_atual()) + ',' + str(tempday(2)))
+        arquivo.write('\n' + str(data_atual()-1) + ',' + str(tempday(2)))
         arquivo.close()
 
 def ler():
