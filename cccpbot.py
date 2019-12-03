@@ -106,22 +106,16 @@ async def on_message(message):
             elif message.content.startswith('atras'):
 
                 
-                if len(message.content) == 7:
-
-                    diaat = int(message.content[6])
-                
-                elif len(message.content) == 8:
-
-                    diaat = int(message.content[6] + message.content[7])
+                diaat = int(message.content[6:])
 
                 if diaat > len(ler()):
                     await message.channel.send('Não temos registros dessa data')
                 
                 else:
                     atmen = ler()
-                    atmen = ler()[len(atmen)-diaat][1]
+                    atmen1 = ler()[len(atmen)-diaat][1]
                     
-                    await message.channel.send(f'foram registradas {atmen} mensagens {diaat} dias atrás')
+                    await message.channel.send(f'foram registradas {atmen1} mensagens {diaat} dias atrás')
 
             elif message.content.startswith('ajuda'):
 
