@@ -10,6 +10,14 @@ men_hoje = 0
 
 def tempday(modo):
 
+    ''' 
+    Função que manipula o arquivo temporario de mensagens.
+    Modo 1 = adiciona +1 mensagem ao arquivo.
+    Modo 2 = Lê a quantidade de mensagens.
+    Modo 3 = Reseta a quantidade de mensagens
+    
+    '''
+
     if modo == 1:
 
         temp = int(tempday(2))
@@ -41,6 +49,13 @@ def hora_atual():
     return int(str(datetime.datetime.now().hour) + str(datetime.datetime.now().minute))
 
 def checador_diario():
+    
+    '''
+    Função de Threading para a contagem do tempo e passagem dos dias.
+    Consiste em 2 loops, o primeiro pra esperar até as 00:00 horas,
+    e o segundo que se inicia logo após o primeiro, que roda a cada 24hrs.
+    '''
+    
     global men_hoje
     dia1 = True
     while True:
@@ -63,12 +78,23 @@ def checador_diario():
             print('passou o dia')
 
 def salvar():
+    
+    '''
+    Função para salvar a data seguida do numero de mensagens do dia no arquivo CSV.
+    É utilizada na passagem dos dias.
+    '''
+
     global men_hoje
     with open('cccp.csv', 'a') as arquivo:
         arquivo.write('\n' + str(data_atual()-1) + ',' + str(tempday(2)))
         arquivo.close()
 
 def ler():
+
+    '''
+    Função que retorna uma lista de listas, cada uma das listas internas representa uma linha no CSV.
+    Cada lista interna possui 2 valores, 1° = data, 2° = número de mensagens.
+    '''
 
     with open('cccp.csv', 'r') as arquivo:
         saida = [A.strip().split(',') for A in arquivo]
@@ -77,6 +103,10 @@ def ler():
 
 def tabela():
 
+    '''
+    Função que cria uma tabela que mostra o numero de mensagens de cada um dos ultimos 10 dias.
+    '''
+    
     dados = ler()
     saida = ''
     dados.reverse()
@@ -91,6 +121,11 @@ def tabela():
 
 def media(num):
 
+    '''
+    Função que retorna uma média que mensagens com base no numero inserido pelo usuario.
+    Caso o valor seja "tudo", será estregue a média de todos os dias no CSV.
+    '''
+    
     dados = ler()
     dados.reverse()
     saida = []
@@ -170,7 +205,6 @@ async def on_message(message):
         except Exception as error:
             await message.channel.send('Você digitou errado, camarada!\nDigite "ajuda" para ver os comandos disponiveis!')
             print(error)
-    
     
     else:
         
