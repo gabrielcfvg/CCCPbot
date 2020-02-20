@@ -1,6 +1,7 @@
-```
-Comandos do Bot
----------------
+﻿```diff
++Comandos do Bot
+---------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------
 "slava" = O bot responde "Viva a Rússia", usado para fins de teste.
 
 "hoje" = Diz o numero de mensagens postada até o momento atual no dia de hoje.
@@ -11,4 +12,11 @@ Comandos do Bot
 
 "media []" = Esse comando, quando acompanhado de um numero(assim como o "atras") mostrará a media das mensagens do dia correspondente ao numero que você escolheu até agora, pode ser utilizado com a palavra "tudo" no lugar de um numero, assim ele mostrará a media de todas as mensagens desde o inicio.
 
+"dias tabela" faz a mesma coisa que o "tabela", só que mostrando a data de cada dia.
+
+"rank" Mostra um rank com no numero de mensagens de cada jogador em ordem numerica
+
+"grank" Mostra um grafico de pizza mostrando a porcentagem de mensagens de cada membro
+
+---------------------------------------------------------------------------------------------------------------------------------------
 ```
