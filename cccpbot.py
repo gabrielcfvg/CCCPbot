@@ -3,11 +3,23 @@ from sys import exit as sys_exit
 from sys import exc_info
 from PIL import Image, ImageDraw, ImageFont
 from discord.ext import commands
+from os.path import exists
 
 client = discord.Client()
 #client2 = commands.Bot(command_prefix= '.')
 userlist = []
 pseudo_timer = 0
+canais_ativos = ['off-topic', 'floodbot']
+
+'''Criador dos arquivos necessarios para o funcionamento do bot
+   Tire de comentario pare que sejam criados automaticamente!
+
+files = ['cccp.csv', 'rank.csv', 'tempday.txt']
+for A in files:
+    if not exists(A)
+        open(A, 'w')
+'''
+
 
 def kill():
     sys_exit()
@@ -485,7 +497,7 @@ async def on_message(message):
     Cadeia de comandos gerais
     '''
     
-    if str(message.channel) == 'floodbot' and message.author != client.user or str(message.channel) == 'off-topic' and message.author != client.user:
+    if message.author != client.user and str(message.channel) in canais_ativos:
 
         try:
             
