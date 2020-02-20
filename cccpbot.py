@@ -5,7 +5,7 @@ from PIL import Image, ImageDraw, ImageFont
 from discord.ext import commands
 
 client = discord.Client()
-client2 = commands.Bot(command_prefix= '.')
+#client2 = commands.Bot(command_prefix= '.')
 userlist = []
 pseudo_timer = 0
 
@@ -626,5 +626,5 @@ async def on_member_join(member):
     role = discord.utils.get(member.guild.roles, name = "Boars")
     await member.add_roles(role)
 
-
-client.run('')
+token = open('token.txt', 'r', encoding='utf-8').read()
+client.run(token)
