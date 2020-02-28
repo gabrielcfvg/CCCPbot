@@ -1,15 +1,19 @@
-import discord, datetime, threading, time
-from sys import exit as sys_exit
-from sys import exc_info
-from PIL import Image, ImageDraw, ImageFont
-from discord.ext import commands
+import datetime
+import threading
+import time
+from sys import exc_info, exit as sys_exit
 from os.path import exists
+from PIL import Image, ImageDraw, ImageFont
+import discord
+from random import choice
+
 
 client = discord.Client()
-#client2 = commands.Bot(command_prefix= '.')
 userlist = []
 pseudo_timer = 0
 canais_ativos = ['off-topic', 'floodbot']
+
+
 
 '''Criador dos arquivos necessarios para o funcionamento do bot
    Tire de comentario pare que sejam criados automaticamente!
@@ -23,6 +27,7 @@ for A in files:
 
 def kill():
     sys_exit()
+
 
 def tempday(modo):
 
@@ -46,13 +51,16 @@ def tempday(modo):
     elif modo == 3:
         open('tempday.txt', 'w').write('0')
 
+
 def data_atual():
 
     return int(str(datetime.date.today()).replace("-",""))
 
+
 def hora_atual():
 
     return int(str(datetime.datetime.now().hour) + str(datetime.datetime.now().minute))
+
 
 def checador_diario():
     
@@ -79,6 +87,7 @@ def checador_diario():
             time.sleep(86400)
             salvar(1)
             print(f'passou o dia  {datetime.datetime.now()}')
+
 
 def salvar(modo):
 
@@ -147,6 +156,7 @@ def salvar(modo):
 
             arquivo.write(texto)
 
+
 def ler(modo):
 
     '''
@@ -167,6 +177,7 @@ def ler(modo):
         '''realiza a leitura do arquivo de mensagens por pessoa'''
 
         return [A.strip().split(',') for A in open('rank.csv', 'r', encoding='utf-8-sig').readlines()]
+
 
 def tabela(dia=1):
 
@@ -229,6 +240,7 @@ def tabela(dia=1):
 
     return saida
 
+
 def media(num):
 
     '''
@@ -245,27 +257,11 @@ def media(num):
 
     return f'a média de mensagens dos ultimos {num} dias é de {media:.1f} mensagens.'
 
+
 def ajuda():
 
     return open('doc.txt', 'r', encoding='UTF-8').read()
 
-def tabela_dias():
-
-    '''
-    Função que cria uma tabela que mostra o numero de mensagens de cada um dos ultimos 20 dias seguida do dia exato em que foram enviadas.
-    '''
-    
-    dados = ler(1)
-    dados.reverse()
-    saida = ''
-    saida += '```diff\n-TABELA COM DIAS\n'
-    saida += ('-'*25)+'\n'
-    for A in range(20):
-        saida += f'{dados[A][0][0:4]}/{dados[A][0][4:6]}/{dados[A][0][6:8]} = {dados[A][1]} Mensagens\n'
-    saida += ('-'*25)+ '\n'
-    saida += media(20) + '\n'
-    saida += ('-'*25)+ '\n```'
-    return saida
 
 def ranks(user, mensagem):
     
@@ -315,7 +311,8 @@ def ranks(user, mensagem):
         pseudo_timer = 0
         salvar(2)
         userlist = []
-            
+
+          
 def tabela_rank(author):
 
     server = client.get_guild(272166101025161227)
@@ -331,21 +328,32 @@ def tabela_rank(author):
     
     
     saida = ''
-    saida += '```diff\n-RANK\n'
-    saida += ('-'*25)+'\n'
+    saida += '```diff\n'
     for A in range(rang):
-    
+        '''
         if str(author) == str(dados[A][0]):
 
             saida += f'-{A+1} {server.get_member(int(str(dados[A][0])))} === {str(int(float(dados[A][1])))}\n'
 
         elif str(author) != str(dados[A][0]):
 
-            saida += f'+{A+1} {server.get_member(int(str(dados[A][0])))} === {str(int(float(dados[A][1])))}\n'
+            saida += f'+{A+1} {server.get_member(int(str(dados[A][0])))} === str(author) == str(dados[A][0])
+        '''
+        temp1 = f"{'-' if str(author) == str(dados[A][0]) else '+'}{('0'+str(A+1)) if A+1 < 10 else A+1}-{server.get_member(int(str(dados[A][0])))}"
+        
+        if not int(str(dados[A][0])) == 178527034606092288:
+            temp2 = f"{'-'*(35-len(temp1))}{str(int(float(dados[A][1])))}\n"
+        else:
+            temp2 = f"{'-'*(30-len(temp1))}{str(int(float(dados[A][1])))}\n"
+        
+        
+        saida += temp1+temp2
 
-    saida += ('-'*25)+ '\n```'
+
+    saida += '```'
 
     return saida
+
 
 def renderGraph(name,time=7):
     
@@ -400,6 +408,7 @@ def renderGraph(name,time=7):
         draw.text((10,size[1]-30-(i*50)),str(i*50*5),"Gold",font=font2)#insere valores no eixo y(qtd mensagens)
 
     img.save(f"{name}.png")
+
 
 def renderRankGraph(path):
     colors = [(0,0,128,255),(0,0,255,255),(0,128,0,255),(0,255,0,255),(0,255,255,255),(128,0,0,255),(128,0,128,255),(128,128,0,255),(128,128,128,255),(192,192,192,255),(255,0,0,255),(255,0,255,255),(6, 40, 26, 255),(255,255,0,255)]
@@ -465,6 +474,34 @@ def renderRankGraph(path):
 
     imgg.save("rank.png")
 
+def record():
+
+    data = ler(1)
+    data.sort(key=lambda num: int(float(num[1])), reverse=True)
+
+    saida = ''
+    saida += '```diff\n'
+    saida += '-'*20
+    saida += '\n'
+
+    for A in range(10):
+        temp = data[A][0]
+        dia = [f'{temp[6]}{temp[7]}', f'{temp[4]}{temp[5]}', f'{temp[0]}{temp[1]}{temp[2]}{temp[3]}']
+        saida += f'+{A+1} - {dia[0]}/{dia[1]}/{dia[2]} === {data[A][1]}\n'
+    
+    saida += '-'*20
+    saida += '```'
+
+    return saida
+
+def quote(modo=1, new=''):
+
+    if modo == 1:
+        lista = open("quotes.txt", 'r', encoding='utf-8').readlines()
+        return choice(lista)
+    elif modo == 2:
+        open("quotes.txt", 'a', encoding='utf-8').write(new+'\n')
+
 #====================================================================================================================================================================
 
 threading.Thread(target=checador_diario, daemon = True).start()
@@ -492,6 +529,18 @@ async def on_message(message):
         print(f'{data_atual()}/{hora_atual()} - o bot foi assasinado por {message.author}')
         await message.channel.send('CCCP desativado!')
         kill()
+
+    if message.content.startswith("-"):
+        
+        if message.content.startswith("-rquote"):
+            
+            await message.channel.send("``"+quote(1)+"``")
+        
+        elif message.content.startswith("-quote"):
+            
+            quote(2, str(message.content).split('=')[1])
+            await message.channel.send("Quote salvo com sucesso")
+
 
     '''
     Cadeia de comandos gerais
@@ -548,18 +597,16 @@ async def on_message(message):
             
             #-----------------------------------------------------------------------------------------------------
             
-            elif message.content.startswith('dias tabela'):
-                await message.channel.send(tabela_dias())
-            
-            #-----------------------------------------------------------------------------------------------------
-            
             elif message.content.startswith('rank'):
                 
                 pseudo_timer = 0
                 salvar(2)
                 userlist = []
                 
-                await message.channel.send(tabela_rank(message.author.id))
+                saida = discord.Embed(title="Rank", description="Ranking dos camaradas mais ativos do servidor", color=0xFF0000)
+                saida.add_field(name="OBS: Esse ranking é resetado a cada 7 dias", value= tabela_rank(message.author.id))
+
+                await message.channel.send(embed=saida)
             
             #-----------------------------------------------------------------------------------------------------
             
@@ -585,11 +632,22 @@ async def on_message(message):
             #----------------------------------------------------------------------------------------------------- 
             
             elif message.content.startswith("grank"):
+                
+                pseudo_timer = 0
+                salvar(2)
+                userlist = []
+                
                 renderRankGraph("rank.csv")
                 await message.channel.send(f'Gráfico dos membros mais ativos do servidor', file=discord.File("rank.png"))
             
             #-----------------------------------------------------------------------------------------------------
+            
+            elif message.content.startswith("recorde"):
 
+                await message.channel.send('Dias mais ativos do servidor'+record())
+            
+            
+            #-----------------------------------------------------------------------------------------------------
             elif message.content.startswith("ping"):
                 time = str((client.latency*1000)).split(".")[0]
                 await message.channel.send(f"{time}ms!")
