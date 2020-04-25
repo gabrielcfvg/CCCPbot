@@ -112,7 +112,7 @@ class Funcoes:
         Função que salva o número do arquivo "tempday.txt" no CSV principal
         """
 
-        open("dados_dias.csv", 'a').write(f"{str(datetime.date.today()).replace('-','')},{Funcoes.numero_de_mensagens(2)}")
+        open("cccp.csv", 'a').write(f"\n{str(datetime.date.today()).replace('-','')},{Funcoes.numero_de_mensagens(2)}")
 
 
     @staticmethod
