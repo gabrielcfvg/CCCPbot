@@ -112,7 +112,7 @@ class Funcoes:
         Função que salva o número do arquivo "tempday.txt" no CSV principal
         """
 
-        open("cccp.csv", 'a').write(f"\n{str(datetime.date.today()).replace('-','')},{Funcoes.numero_de_mensagens(2)}")
+        open("cccp.csv", 'a').write(f"\n{int(str(datetime.datetime.date.today()).replace('-',''))-1},{Funcoes.numero_de_mensagens(2)}")
 
 
     @staticmethod
@@ -563,6 +563,45 @@ class Resposta:
         await send(f"Ontem foram registradas {data[-1][1]} mensagens")
         
 
+    @staticmethod
+    async def censurar(send, message):
+        
+        if "Officers" not in [A.name for A in message.author.roles]:
+            await send("Você não tem permissão para usar esse comando")
+            return
+
+        alvo = message.guild.get_member(int(message.content[12:]))
+
+        cargo_censurado = discord.utils.get(message.guild.roles, name = "Censurado")
+        cargo_boar = discord.utils.get(message.guild.roles, name = "Boars")
+
+
+        await alvo.add_roles(cargo_censurado)
+        await alvo.remove_roles(cargo_boar)
+
+        await send("Usuário censurado com sucesso!!!")
+
+
+    @staticmethod
+    async def descensurar(send, message):
+
+        if "Officers" not in [A.name for A in message.author.roles]:
+            await send("Você não tem permissão para usar esse comando")
+            return
+
+        alvo = message.guild.get_member(int(message.content[15:]))
+
+        cargo_censurado = discord.utils.get(message.guild.roles, name = "Censurado")
+        cargo_boar = discord.utils.get(message.guild.roles, name = "Boars")
+
+
+        await alvo.add_roles(cargo_boar)
+        await alvo.remove_roles(cargo_censurado)
+
+        await send("Usuário descensurado com sucesso!!!")
+
+
+
 async def parser(message):
     
     send = message.channel.send
@@ -591,6 +630,10 @@ async def parser(message):
         elif mensagem.startswith("graph"): await Resposta.graph(send, mensagem)
 
         elif mensagem.startswith("grank"): await Resposta.grank(send)
+
+        elif mensagem.startswith("censurar"): await Resposta.censurar(send, message)
+
+        elif mensagem.startswith("descensurar"): await Resposta.descensurar(send, message)
 
     except Exception as erro:
 
