@@ -4,6 +4,11 @@ import datetime
 from time import sleep
 from traceback import print_exc
 from PIL import Image, ImageDraw, ImageFont
+from pytz import timezone
+from pickle import loads
+from copy import deepcopy
+
+from database import Database
 
 ##################################################################################################################
 #                                                                                                                #
@@ -12,10 +17,11 @@ from PIL import Image, ImageDraw, ImageFont
 ##################################################################################################################
 
 client = discord.Client()
-CANAIS_PERMITIDOS = ['off-topic', 'floodbot']
 
-userlist = []
-pseudo_timer = 0
+CANAIS_PERMITIDOS = ['off-topic', 'floodbot']
+TIMEZONE = "America/Sao_Paulo"
+
+database = loads(open("data.cccp", 'rb').read())
 
 ##################################################################################################################
 #                                                                                                                #
@@ -40,43 +46,16 @@ class Funcoes:
         while(int(Funcoes.hora_atual()) > 2):
             sleep(30)
         
-        print(f"passou o dia {datetime.datetime.now()}")
+        print(f"passou o dia {datetime.datetime.now(timezone(TIMEZONE))}")
         Funcoes.salvar_dia()
-        Funcoes.numero_de_mensagens(3)
+        database.tempday = 0
 
         while True:
             sleep(86400)
 
-            print(f"passou o dia {datetime.datetime.now()}")
+            print(f"passou o dia {datetime.datetime.now(timezone(TIMEZONE))}")
             Funcoes.salvar_dia()
-            Funcoes.numero_de_mensagens(3)
-
-
-    @staticmethod
-    def numero_de_mensagens(modo: int):
-
-        """
-        Função que gerencia o arquivo de armazenamento de mensagens do dia.
-        
-        Modos:
-            1 = Incrementar +1;
-            2 = Ler valor atual;
-            3 = Resetar valor para 0;
-        """
-
-
-        if modo == 1:
-
-            valor_atual = Funcoes.numero_de_mensagens(2)
-            open('tempday.txt', 'w').write(str(valor_atual+1))
-
-        elif modo == 2:
-
-            return int(open('tempday.txt', 'r').read())
-
-        elif modo == 3:
-
-            open('tempday.txt', 'w').write('0')
+            database.tempday = 0
 
 
     @staticmethod
@@ -86,8 +65,8 @@ class Funcoes:
         Retorna a hora atual formatada e pronta para uso.
         """
 
-        hora = str(datetime.datetime.now().hour)
-        minuto = str(datetime.datetime.now().minute)
+        hora = str(datetime.datetime.now(timezone(TIMEZONE)).hour)
+        minutos = str(datetime.datetime.now(timezone(TIMEZONE)).minute)
 
         if len(hora) == 1:
             hora = '0' + hora
@@ -96,15 +75,15 @@ class Funcoes:
             hora = '00'
 
 
-        if len(minuto) == 1:
-            minuto = '0' + minuto
+        if len(minutos) == 1:
+            minutos = '0' + minutos
 
-        elif len(minuto) == 0:
-            minuto = '00'
+        elif len(minutos) == 0:
+            minutos = '00'
 
-        return hora + minuto
+        return hora + minutos
 
-    
+
     @staticmethod
     def salvar_dia():
 
@@ -112,11 +91,34 @@ class Funcoes:
         Função que salva o número do arquivo "tempday.txt" no CSV principal
         """
 
-        open("cccp.csv", 'a').write(f"\n{int(str(datetime.datetime.date.today()).replace('-',''))-1},{Funcoes.numero_de_mensagens(2)}")
+        ano = str(datetime.datetime.now(timezone(TIMEZONE)).year)
+        mês = str(datetime.datetime.now(timezone(TIMEZONE)).month)
+        dia = str((datetime.datetime.now(timezone(TIMEZONE)).day)-1)
+
+        if len(mês) == 1:
+            mês = '0' + mês
+        
+        elif len(mês) == 0:
+            mês = '00'
 
 
+        if len(dia) == 1:
+            dia = '0' + dia
+
+        elif len(dia) == 0:
+            dia = '00'
+
+        data = int(f"{ano}{mês}{dia}")
+
+        database.data_dia.append([data], [database.tempday])
+
+    """
     @staticmethod
     def salvar(modo):
+
+        global pseudo_timer
+        pseudo_timer = 0
+
 
         if modo == 1:
 
@@ -166,7 +168,7 @@ class Funcoes:
 
                 arquivo.write(texto)
 
-            userlist = []
+            userlist = []"""
 
 
     @staticmethod
@@ -179,14 +181,11 @@ class Funcoes:
         """
 
         if modo == 1:
-
-            with open("cccp.csv", "r") as arquivo:
-
-                return [A.strip().split(",") for A in arquivo.readlines()]
+            return deepcopy(database.data_dias)
             
         elif modo == 2:
-
-            return [A.strip().split(',') for A in open('rank.csv', 'r', encoding='utf-8-sig').readlines()]
+            
+            return [[A[0], A[1]] for A in database.data_rank.items()]
 
 
     @staticmethod
@@ -230,14 +229,11 @@ class Funcoes:
         saida += '```diff\n'
         for A in range(rang):
 
-            temp1 = f"{'-' if str(author) == str(dados[A][0]) else '+'}{('0'+str(A+1)) if A+1 < 10 else A+1}-{server.get_member(int(str(dados[A][0])))}"
-            
-            if not int(str(dados[A][0])) == 178527034606092288:
-                temp2 = f"{'-'*(35-len(temp1))}{str(int(float(dados[A][1])))}\n"
-            else:
-                temp2 = f"{'-'*(30-len(temp1))}{str(int(float(dados[A][1])))}\n"
-            
-            
+            nome = "".join([A for A in str(server.get_member(int(str(dados[A][0])))) if ord(A) < 128])
+
+            temp1 = f"{'-' if str(author) == str(dados[A][0]) else '+'}{('0'+str(A+1)) if A+1 < 10 else A+1}-{nome}"
+            temp2 = f"{'-'*(30-len(temp1))}{str(int(float(dados[A][1])))}\n"
+
             saida += temp1+temp2
 
 
@@ -248,8 +244,6 @@ class Funcoes:
 
     @staticmethod
     def contagem_rank(user, mensagem):
-
-        global pseudo_timer, userlist
 
         def calc(men):
 
@@ -269,25 +263,13 @@ class Funcoes:
             else:
                 return len(men)/33
 
-        if len(userlist) == 0:
-            userlist.append([str(user), calc(mensagem)])
+        valor = calc(mensagem)
+
+        if database.data_rank[user]:
+            database.data_rank[user] += float(valor)
 
         else:
-            achou = False
-            for A in userlist:
-                if A[0] == str(user):
-                    
-                    A[1] += calc(mensagem)
-                    achou = True
-                    
-                    break
-            
-            if not achou:
-                userlist.append([str(user), calc(mensagem)])
-
-        if pseudo_timer > 20:
-            pseudo_timer = 0
-            Funcoes.salvar(1)
+            database.data_rank[user] = float(valor)
 
 
     @staticmethod
@@ -297,8 +279,8 @@ class Funcoes:
         data.sort(key=lambda num: int(float(num[1])), reverse=True)
 
         saida = "```"
-        for A in range(10):
-            temp = data[A][0]
+        for A in range(15):
+            temp = str(data[A][0])
             dia = [f'{temp[6]}{temp[7]}', f'{temp[4]}{temp[5]}', f'{temp[0]}{temp[1]}{temp[2]}{temp[3]}']
             saida += f'+{str(A+1):<2} - {dia[0]}/{dia[1]}/{dia[2]} === {data[A][1]}\n'
         saida += "```"
@@ -322,7 +304,7 @@ class Funcoes:
         date = []
         for i in range(1,time+1):
             nums.append(int(table[tableSize-i][1]))
-            date.append(formatDataGraph( table[tableSize-i][0][4:]))
+            date.append(formatDataGraph( str(table[tableSize-i][0])[4:]))
 
         #cria uma imagem branca, com o tamanho de um quinto do maior valor de mensagens+uma sobrinha
         top = int(sorted(nums,reverse=True)[0])+200
@@ -365,6 +347,8 @@ class Funcoes:
     @staticmethod
     def renderRankGraph(path):
         
+        server = client.get_guild(272166101025161227)
+
         colors = [(0,0,128,255),(0,0,255,255),(0,128,0,255),(0,255,0,255),(0,255,255,255),(128,0,0,255),(128,0,128,255),(128,128,0,255),(128,128,128,255),(192,192,192,255),(255,0,0,255),(255,0,255,255),(6, 40, 26, 255),(255,255,0,255)]
         font = ImageFont.truetype("font.ttf",25)#fonte pontos
         def readData(path):
@@ -375,7 +359,7 @@ class Funcoes:
             temp = Funcoes.ler(2)
             CSV = []
             for A in temp:
-                CSV.append([A[0], str(int(float(A[1]))), A[2]])
+                CSV.append([A[0], str(int(float(A[1])))])
             
             return CSV
         def sortGraph(matrix):
@@ -407,7 +391,7 @@ class Funcoes:
 
         for i in range(len(ranks)):
             #le o nome e retira caracteres especiais e ID
-            name = "".join(i for i in ranks[i][2] if ord(i)<128)
+            name = "".join(i for i in str(server.get_member(ranks[i][0])) if ord(i)<128)
             name = name.split("#")[0]+ " "
             msgs = int(ranks[i][1])
 
@@ -427,6 +411,15 @@ class Funcoes:
         draw.text((435,lastPos,780,lastPos+25),f"Other {round(100-perCent,1)}%",(255,215,0,255),font)
 
         imgg.save("rank.png")
+
+
+    @staticmethod
+    def salvar_banco():
+
+        while True:
+
+            database.salvar()
+            sleep(30)
 
 
 class Resposta:
@@ -453,7 +446,7 @@ class Resposta:
         Comando que retorna o número de mensagens enviadas no dia de hoje.
         """
 
-        await send(f"Foram registradas {Funcoes.numero_de_mensagens(2)} mensagens")
+        await send(f"Foram registradas {database.tempday} mensagens")
 
 
     @staticmethod
@@ -496,9 +489,6 @@ class Resposta:
     
     @staticmethod
     async def rank(send, author):
-
-        pseudo_timer = 0
-        Funcoes.salvar(1)
         
         saida = discord.Embed(title="Rank", description="Ranking dos camaradas mais ativos do servidor", color=0xFF0000)
         saida.add_field(name="OBS: Esse ranking é resetado a cada 7 séculos", value= Funcoes.rank(author))
@@ -549,8 +539,6 @@ class Resposta:
 
     @staticmethod
     async def grank(send):
-
-        Funcoes.salvar(1)
         
         Funcoes.renderRankGraph("rank.csv")
         await send(f'Gráfico dos membros mais ativos do servidor', file=discord.File("rank.png"))
@@ -566,7 +554,7 @@ class Resposta:
     @staticmethod
     async def censurar(send, message):
         
-        if "Officers" not in [A.name for A in message.author.roles]:
+        if "Officers" not in [A.name for A in message.author.roles] and "High Boar" not in [A.name for A in message.author.roles]:
             await send("Você não tem permissão para usar esse comando")
             return
 
@@ -581,11 +569,16 @@ class Resposta:
 
         await send("Usuário censurado com sucesso!!!")
 
+        '''
+        gulag = [A.strip() for A in open("gulag.txt", 'r', encoding='utf-8').readlines()]
+        if str(alvo) not in gulag:
+            open("gulag.txt", 'a', encoding='utf-8').write(f"\n{alvo}")'''
+
 
     @staticmethod
     async def descensurar(send, message):
 
-        if "Officers" not in [A.name for A in message.author.roles]:
+        if "Officers" not in [A.name for A in message.author.roles] and "High Boar" not in [A.name for A in message.author.roles]:
             await send("Você não tem permissão para usar esse comando")
             return
 
@@ -599,6 +592,17 @@ class Resposta:
         await alvo.remove_roles(cargo_censurado)
 
         await send("Usuário descensurado com sucesso!!!")
+        
+        '''
+        gulag = [A.strip() for A in open("gulag.txt", 'r', encoding='utf-8').readlines()]
+        if str(alvo) in gulag:
+            open("gulag.txt", 'w', encoding='utf-8').write("".join([]))'''
+
+
+    @staticmethod
+    async def hora(send):
+
+        await send(Funcoes.hora_atual())
 
 
 
@@ -635,6 +639,8 @@ async def parser(message):
 
         elif mensagem.startswith("descensurar"): await Resposta.descensurar(send, message)
 
+        elif mensagem.startswith("hora"): await Resposta.hora(send)
+
     except Exception as erro:
 
         await send("Ocorreu um erro ao tentar executar o seu comando, tente novamente!")
@@ -649,7 +655,7 @@ async def parser(message):
 ##################################################################################################################
 
 threading.Thread(target=Funcoes.passagem_de_dias, daemon=True).start()
-
+threading.Thread(target=Funcoes.salvar_banco, daemon=True).start()
 
 @client.event
 async def on_ready():
@@ -658,14 +664,15 @@ async def on_ready():
     print("=============")
     print("===CCCPBOT===")
     print("=============")
-    print(datetime.datetime.now(), '\n\n')
+    print(datetime.datetime.now(timezone(TIMEZONE)), '\n\n')
 
 
 @client.event
 async def on_message(message):
 
-    Funcoes.numero_de_mensagens(1)
-    if not message.author.bot: Funcoes.contagem_rank(message.author.id, message.content)
+
+    database.tempday += 1
+    if not message.author.bot: threading.Thread(target=Funcoes.contagem_rank, args=(message.author.id, message.content)).start()
 
 
     if (str(message.channel) in CANAIS_PERMITIDOS) and (message.content.startswith("cp")) and (message.author.bot == False):
@@ -682,7 +689,7 @@ async def on_message_delete(message):
     if str(message.channel) == 'logs' or str(message.channel) == 'politburo':
         return
     else:
-        await channell.send(f'```diff\n---------------------------\n-Uma mensagem foi deletada!\n---------------------------\nMensagem = \n{msg}\n---------------------------\nUsuario = {message.author}\nCanal = {message.channel}\nData e hora = {datetime.date.today()}--{datetime.datetime.now().hour}:{datetime.datetime.now().minute}:{datetime.datetime.now().second}\n```')
+        await channell.send(f'```diff\n---------------------------\n-Uma mensagem foi deletada!\n---------------------------\nMensagem = \n{msg}\n---------------------------\nUsuario = {message.author}\nCanal = {message.channel}\nhora = {datetime.datetime.now(timezone(TIMEZONE)).hour}:{datetime.datetime.now(timezone(TIMEZONE)).minute}:{datetime.datetime.now(timezone(TIMEZONE)).second}\n```')
 
 
 @client.event
@@ -698,7 +705,7 @@ async def on_message_edit(before, after):
     else:
         
         if before.content != after.content:
-            await channell.send(f'```diff\n---------------------------\n+Uma mensagem foi editada\n---------------------------\nMensagem anterior = \n{bef}\n---------------------------\nMensagem atual = \n{aft}\n---------------------------\nUsuario = {before.author}\nCanal = {before.channel}\nData e Hora = {datetime.date.today()}--{datetime.datetime.now().hour}:{datetime.datetime.now().minute}:{datetime.datetime.now().second}\n```')
+            await channell.send(f'```diff\n---------------------------\n+Uma mensagem foi editada\n---------------------------\nMensagem anterior = \n{bef}\n---------------------------\nMensagem atual = \n{aft}\n---------------------------\nUsuario = {before.author}\nCanal = {before.channel}\nhora = {datetime.datetime.now(timezone(TIMEZONE)).hour}:{datetime.datetime.now(timezone(TIMEZONE)).minute}:{datetime.datetime.now(timezone(TIMEZONE)).second}\n```')
 
 
 @client.event
