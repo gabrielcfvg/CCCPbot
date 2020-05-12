@@ -62,12 +62,20 @@ class Database:
         
 
 
-data = Database()
-data.load_from_text(config.data_dias, config.data_rank, config.tempday)
-data.salvar()
-data.dump_to_text()
 
-'''
-data = loads(open("data.cccp", 'rb').read())
-data.dump_to_text()
+
+if __name__ == "__main__":
+    
+    """
+    data = Database()
+    data.load_from_text(config.data_dias, config.data_rank, config.tempday)
+    data.salvar()
+    data.dump_to_text()
+    """
+
     '''
+    data = loads(open("data.cccp", 'rb').read())
+    data.dump_to_text()
+    '''
+
+    pass
