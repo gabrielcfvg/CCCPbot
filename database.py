@@ -1,6 +1,3 @@
-import config
-from pickle import loads
-
 class Database:
 
     def salvar(self):
@@ -59,23 +56,3 @@ class Database:
 
             arquivo.write(str(self.tempday))
 
-        
-
-
-
-
-if __name__ == "__main__":
-    
-    """
-    data = Database()
-    data.load_from_text(config.data_dias, config.data_rank, config.tempday)
-    data.salvar()
-    data.dump_to_text()
-    """
-
-    '''
-    data = loads(open("data.cccp", 'rb').read())
-    data.dump_to_text()
-    '''
-
-    pass
