@@ -283,14 +283,17 @@ class Comandos:
     @staticmethod
     async def backup(send):
 
+        arquivos_ignorados = ("backup.zip", "token.txt", ".git")
+
         from zipfile import ZipFile
         from os import walk
         
         with ZipFile("backup.zip", 'w') as arquivo:
 
-            for root, dirs, files in os.walk('.'):
+            for root, dirs, files in os.walk('.'):# pylint: disable=unused-variable
                 for file in files:
-                    if "backup.zip" not in file: arquivo.write(os.path.join(root, file))
+                    if all([A not in (os.path.join(root, file)) for A in arquivos_ignorados]):
+                        arquivo.write(os.path.join(root, file))
         
         await send(file=discord.File("backup.zip"))
         os.remove("backup.zip")
@@ -331,7 +334,7 @@ class Comandos:
     async def rank(send, autor):
 
 
-        server = CLIENT.get_guild(272166101025161227)
+        server = CLIENT.get_guild(SERVER_ID)
 
         data = Dados.tabela_rank(1)
         data.sort(reverse=True, key=lambda x: x[1])
@@ -428,7 +431,7 @@ class Comandos:
     @staticmethod
     async def renderRankGraph(send):
         
-        server = CLIENT.get_guild(272166101025161227)
+        server = CLIENT.get_guild(SERVER_ID)
 
         colors = [(0,0,128,255),(0,0,255,255),(0,128,0,255),(0,255,0,255),(0,255,255,255),(128,0,0,255),(128,0,128,255),(128,128,0,255),(128,128,128,255),(192,192,192,255),(255,0,0,255),(255,0,255,255),(6, 40, 26, 255),(255,255,0,255)]
         font = ImageFont.truetype("font.ttf",25)#fonte pontos
