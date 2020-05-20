@@ -106,7 +106,7 @@ class Tempo:
     @staticmethod
     def intdata():
 
-        return int(datetime.datetime.fromtimestamp(Tempo.posixtime()).strftime(r"%Y%m%d"))
+        return int(Tempo.datetime().strftime(r"%Y%m%d"))
 
 
 class Funções:
@@ -139,6 +139,7 @@ class Funções:
     @staticmethod
     def salvar_dia():
 
+        print('='*30, "\npasou o dia", str(Tempo.datetime().strftime(r"%Y %m %d | %H %M %S")))
         Dados.incrementar_data_dias(Tempo.intdata(), Dados.tempday())
         Dados.resetar_tempday()
 
