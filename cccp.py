@@ -371,7 +371,14 @@ class Comandos:
     @staticmethod
     async def renderGraph(send, mensagem):
     
-        time = int(mensagem[6:]) if len(mensagem) > 6 else 7
+        valor = mensagem[6:]
+        
+        if len(mensagem) <= 6:
+            time = 7
+        elif valor in ["tudo", "all"]:
+            time = len(Dados.tabela_dias())
+        else:
+            time = int(valor)
 
 
         def formatDataGraph(date):
