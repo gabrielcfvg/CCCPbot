@@ -91,6 +91,11 @@ class Dados:
             DATABASE.data_dias.append([dia, valor])
             DATABASE.data_dias.sort(key=lambda x:x[0])
 
+    @staticmethod
+    def resetar_rank():
+
+        DATABASE.data_rank = {}
+
 
 class Tempo:
 
@@ -115,7 +120,7 @@ class Funções:
     def passar_dia():
 
         data = Tempo.datetime()
-        alvo = datetime.datetime(data.year, data.month, data.day, 23, 59, 59)
+        alvo = datetime.datetime(data.year, data.month, data.day, 23, 59, 40)
         data = datetime.datetime.timestamp(data)
         alvo = datetime.datetime.timestamp(alvo)+TIME_DIFF
 
@@ -531,6 +536,14 @@ class Comandos:
 
         await send("Valor alterado com sucesso!!!")
 
+    @staticmethod
+    @Funções.checar_permissão(cargo_ou_id=[197477133675659264, 178527034606092288])
+    async def resetar_rank(send):
+
+        Dados.resetar_rank()
+        await send("Rank resetado com sucesso!!!")
+
+
 
 async def parser(message):
 
@@ -571,6 +584,9 @@ async def parser(message):
         elif mensagem.startswith("mtempday"): await Comandos.alterar_tempday(send, mensagem, autor=autor, send=send)# pylint: disable=unexpected-keyword-arg, redundant-keyword-arg
         
         elif mensagem.startswith("mtabela"): await Comandos.alterar_tabela(send, mensagem, autor=autor, send=send)# pylint: disable=unexpected-keyword-arg, redundant-keyword-arg
+
+        elif mensagem.startswith("mrank"): await Comandos.resetar_rank(send, autor=autor, send=send)# pylint: disable=unexpected-keyword-arg, redundant-keyword-arg
+
 
 
         else:
