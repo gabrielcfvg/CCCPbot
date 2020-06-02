@@ -20,6 +20,7 @@ CLIENT = discord.Client()
 DATABASE = loads(open("data.cccp", 'rb').read())
 CANAIS_PERMITIDOS = ['off-topic', 'floodbot']
 SERVER_ID = 272166101025161227
+START_DATE = time()
 
 TIME_DIFF = 0
 DEBUG = False
@@ -509,6 +510,17 @@ class Comandos:
         imgg.save("tmp.png")
         await send(file=discord.File("tmp.png"))
 
+
+    @staticmethod
+    async def uptime(send):
+
+        tmp = Tempo.datetime() - datetime.datetime.fromtimestamp(START_DATE)
+        await send(str(tmp))
+
+
+
+
+
     ####################################################
     #                                                  #
     #                  Administração                   #
@@ -576,6 +588,9 @@ async def parser(message):
         elif mensagem.startswith("graph"): await Comandos.renderGraph(send, mensagem)
 
         elif mensagem.startswith("grank"): await Comandos.renderRankGraph(send)
+
+        elif mensagem.startswith("uptime"): await Comandos.uptime(send)
+
 
         ###################################
         #     Comandos Administrativos    #
