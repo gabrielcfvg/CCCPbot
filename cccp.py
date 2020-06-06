@@ -139,6 +139,8 @@ class Funções:
         while True:
 
             sleep(20)
+            DATABASE.dump_to_text()
+            sleep(0.5)
             DATABASE.salvar()
 
 
