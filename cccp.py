@@ -62,6 +62,10 @@ class Dados:
             DATABASE.data_rank[id] = float(num)
 
     @staticmethod
+    def deletar_usuário(id):
+        del DATABASE.data_rank[id]
+
+    @staticmethod
     def tabela_dias():
         return deepcopy(DATABASE.data_dias)
 
@@ -123,7 +127,7 @@ class Funções:
         data = Tempo.datetime()
         alvo = datetime.datetime(data.year, data.month, data.day, 23, 59, 40)
         data = datetime.datetime.timestamp(data)
-        alvo = datetime.datetime.timestamp(alvo)+TIME_DIFF
+        alvo = datetime.datetime.timestamp(alvo) + TIME_DIFF
 
         sleep(alvo-data)
         Funções.salvar_dia()
@@ -550,6 +554,7 @@ class Comandos:
 
         await send("Valor alterado com sucesso!!!")
 
+
     @staticmethod
     @Funções.checar_permissão(cargo_ou_id=[197477133675659264, 178527034606092288])
     async def resetar_rank(send):
@@ -557,6 +562,15 @@ class Comandos:
         Dados.resetar_rank()
         await send("Rank resetado com sucesso!!!")
 
+
+    @staticmethod
+    @Funções.checar_permissão(cargo_ou_id="Officers")
+    async def resetar_usuário(send, mensagem):
+
+        _id = int(mensagem[10:])
+        Dados.deletar_usuário(_id)
+        await send("Usuário resetado com sucesso!!!")
+        
 
 
 async def parser(message):
@@ -604,6 +618,7 @@ async def parser(message):
 
         elif mensagem.startswith("mrank"): await Comandos.resetar_rank(send, autor=autor, send=send)# pylint: disable=unexpected-keyword-arg, redundant-keyword-arg
 
+        elif mensagem.startswith("muserrank"): await Comandos.resetar_usuário(send, mensagem, autor=autor, send=send)# pylint: disable=unexpected-keyword-arg, redundant-keyword-arg
 
 
         else:
