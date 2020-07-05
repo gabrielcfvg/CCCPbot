@@ -144,7 +144,7 @@ class Funções:
 
             sleep(20)
             DATABASE.dump_to_text()
-            sleep(0.5)
+            sleep(10)
             DATABASE.salvar()
 
 
