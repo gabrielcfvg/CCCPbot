@@ -523,6 +523,16 @@ class Comandos:
         tmp = Tempo.datetime() - datetime.datetime.fromtimestamp(START_DATE)
         await send(str(tmp))
 
+    @staticmethod
+    async def amanha(send):
+
+        data = Dados.tabela_dias()
+        data.reverse()
+
+        média = sum([data[A][1] for A in range(7)]) / 7
+
+        await send(f"Amanha teremos {int(média)} mensagens!!!")
+
 
 
 
@@ -606,6 +616,8 @@ async def parser(message):
         elif mensagem.startswith("grank"): await Comandos.renderRankGraph(send)
 
         elif mensagem.startswith("uptime"): await Comandos.uptime(send)
+
+        elif mensagem.startswith("amanha"): await Comandos.amanha(send)
 
 
         ###################################
