@@ -1,11 +1,16 @@
 from database import Database
 from pickle import loads
+import os
 
 
-data_dias = "data_text_files\\cccp.csv"
-data_rank = "data_text_files\\rank.csv"
-tempday = "data_text_files\\tempday.txt"
 
+
+PATH = os.path.abspath(__file__).replace("\\", "/")
+PATH = PATH[:PATH.rfind("/")]
+
+data_dias = PATH+"/data_text_files/cccp.csv"
+data_rank = PATH+"/data_text_files/rank.csv"
+tempday = PATH+"/data_text_files/tempday.txt"
 
 print("\n", "="*30,
       "(1) = banco -> texto",
@@ -23,10 +28,10 @@ if ent == 2:
 
     data = Database()
     data.load_from_text(data_dias, data_rank, tempday)
-    data.salvar()
+    data.salvar(PATH)
 
 if ent == 1:
 
     data = loads(open("data.cccp", 'rb').read())
-    data.dump_to_text()
+    data.dump_to_text(PATH)
 

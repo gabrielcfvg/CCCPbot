@@ -16,8 +16,18 @@ from PIL import Image, ImageDraw, ImageFont
 #                                                                                                                #
 ##################################################################################################################
 
-CLIENT = discord.Client()
-DATABASE = loads(open("data.cccp", 'rb').read())
+
+
+PATH = os.path.abspath(__file__).replace("\\", "/")
+PATH = PATH[:PATH.rfind("/")]
+print(PATH)
+
+INTENTS = discord.Intents.default()
+INTENTS.members = True
+CLIENT = discord.Client(intents=INTENTS)
+
+
+DATABASE = loads(open(f"{PATH}/data.cccp", 'rb').read())
 CANAIS_PERMITIDOS = ['off-topic', 'floodbot']
 SERVER_ID = 272166101025161227
 START_DATE = time()
@@ -101,6 +111,11 @@ class Dados:
 
         DATABASE.data_rank = {}
 
+    @staticmethod
+    def change_user_rank(id, num):
+
+        DATABASE.data_rank[id] = num
+
 
 class Tempo:
 
@@ -143,9 +158,9 @@ class Funções:
         while True:
 
             sleep(20)
-            DATABASE.dump_to_text()
+            DATABASE.dump_to_text(PATH)
             sleep(10)
-            DATABASE.salvar()
+            DATABASE.salvar(PATH)
 
 
     @staticmethod
@@ -353,16 +368,22 @@ class Comandos:
         data = list(map(lambda a:[a[0], int(a[1])], data))
 
         rang = 20 if len(data) >= 20 else len(data)
-
         pré_saida = ""
         for A in range(rang):
 
-            nome = "".join([B for B in str(server.get_member(data[A][0])) if ord(B) < 128 ])
+            member = server.get_member(data[A][0])
 
-            temp1 = f"""{"-" if data[A][0] == autor else '+'}{("0"+str(A+1)) if A+1 < 10 else str(A+1)} {nome}"""
-            temp2 = f"""{"-"*(30-len(temp1))}{data[A][1]}\n"""
+            if (member != None):
 
-            pré_saida += temp1+temp2
+                if (member.nick):
+                    nome = "".join([B for B in str(member.nick) if ord(B) < 128 ])[:24]
+                else:
+                    nome = "".join([B for B in str(member) if ord(B) < 128 ])[:24]
+
+                temp1 = f"""{"-" if data[A][0] == autor else '+'}{("0"+str(A+1)) if A+1 < 10 else str(A+1)} {nome}"""
+                temp2 = f"""{"-"*(30-len(temp1))}{data[A][1]}\n"""
+
+                pré_saida += temp1+temp2
 
         
         pré_saida = f"```diff\n{pré_saida}\n```"
@@ -523,6 +544,7 @@ class Comandos:
         tmp = Tempo.datetime() - datetime.datetime.fromtimestamp(START_DATE)
         await send(str(tmp))
 
+
     @staticmethod
     async def amanha(send):
 
@@ -533,8 +555,10 @@ class Comandos:
 
         await send(f"Amanha teremos {int(média)} mensagens!!!")
 
+    @staticmethod
+    async def ajuda(send):
 
-
+        await send("```slava\nhoje\natras\nontem\nping\nrecorde\nbackup\ntabela\nrank\nhora\ngraph\ngrank\nuptime\namanha\nmtempday\nmtabela\nmuserrank\nmrank\nmchangerank```")
 
 
     ####################################################
@@ -569,8 +593,45 @@ class Comandos:
     @Funções.checar_permissão(cargo_ou_id=[197477133675659264, 178527034606092288])
     async def resetar_rank(send):
 
-        Dados.resetar_rank()
+        await Comandos.backup(send)
+        
         await send("Rank resetado com sucesso!!!")
+
+        server = CLIENT.get_guild(SERVER_ID)
+        
+        lock_cargo = ["Officers", "Old Boar", "High Boar"]
+        result = []
+
+        data = Dados.tabela_rank(1)
+        data.sort(reverse=True, key=lambda x: x[1])
+        data = list(map(lambda a:[a[0], int(a[1])], data))
+        
+        rang = 20 if len(data) >= 20 else len(data)
+
+        for A in range(rang):
+
+            member = server.get_member(data[A][0])
+            if member == None:
+                continue
+            
+            member_roles = [A.name for A in member.roles]
+
+            if len([0 for A in lock_cargo if A in member_roles]) > 0:
+                continue
+    
+            if (member.nick):
+                result.append("".join([B for B in str(member.nick) if ord(B) < 128 ])[:24])
+            else:
+                result.append("".join([B for B in str(member) if ord(B) < 128 ])[:24])
+
+            if len(result) > 2:
+                break
+        
+        result_str = "```"
+        result_str += "".join([A+" " for A in result])
+        result_str += "```"
+        Dados.resetar_rank()
+        await send(f"Novos most activies: {result_str}")
 
 
     @staticmethod
@@ -581,6 +642,18 @@ class Comandos:
         Dados.deletar_usuário(_id)
         await send("Usuário resetado com sucesso!!!")
         
+    @staticmethod
+    @Funções.checar_permissão(cargo_ou_id="Officers")
+    async def change_user_rank(send, message):
+        
+        user_id = int(message.split(" ")[1])
+        num = int(message.split(" ")[2])
+
+        Dados.change_user_rank(user_id, num)
+
+        await send("valores alterados com sucesso")
+
+
 
 
 async def parser(message):
@@ -619,6 +692,8 @@ async def parser(message):
 
         elif mensagem.startswith("amanha"): await Comandos.amanha(send)
 
+        elif mensagem.startswith("ajuda"): await Comandos.ajuda(send)
+
 
         ###################################
         #     Comandos Administrativos    #
@@ -632,6 +707,7 @@ async def parser(message):
 
         elif mensagem.startswith("muserrank"): await Comandos.resetar_usuário(send, mensagem, autor=autor, send=send)# pylint: disable=unexpected-keyword-arg, redundant-keyword-arg
 
+        elif mensagem.startswith("mchangerank"): await Comandos.change_user_rank(send, mensagem, autor=autor, send=send)# pylint: disable=unexpected-keyword-arg, redundant-keyword-arg
 
         else:
             await send("Comando não existente")
@@ -641,9 +717,6 @@ async def parser(message):
         await send("Ocorreu um erro ao tentar executar o seu comando, tente novamente!")
         print(f"erro = |{error}|")
         print_exc()
-
-        with open("log/stderr.txt", 'a', encoding="'utf-8") as stderr:
-            stderr.write(("\n"*3)+format_exc())
 
 
 
@@ -666,13 +739,19 @@ async def on_ready():
     print("===CCCPBOT===")
     print("=============")
     print(str(datetime.datetime.now()))
+    print(CLIENT.get_user(197477133675659264))
 
 
 @CLIENT.event
 async def on_message(message):
 
+    # print("teste")
+
     Dados.incrementar_tempday()
-    if not message.author.bot: Thread(target=Funções.contagem_rank, args=[message], daemon=True).start()
+    if (not message.author.bot) and str(message.channel.id) != "770107741585932339": 
+        Thread(target=Funções.contagem_rank, args=[message], daemon=True).start()
+
+        # print(str(message.guild.get_member(message.author.id).nick))
 
     if (str(message.channel) in CANAIS_PERMITIDOS) and (message.content.startswith("cp")) and (message.author.bot == False):
         await parser(message)
@@ -716,9 +795,12 @@ async def on_message_edit(before, after):
 @CLIENT.event
 async def on_member_join(member):
 
+    print("------------")
+    print(member)
+
     role = discord.utils.get(member.guild.roles, name = "Boars")
     await member.add_roles(role)
 
 
 
-CLIENT.run(open('token.txt', 'r', encoding='utf-8').read())
+CLIENT.run(open(f'{PATH}/token.txt', 'r', encoding='utf-8').read())

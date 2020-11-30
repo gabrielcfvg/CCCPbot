@@ -1,10 +1,10 @@
 class Database:
 
-    def salvar(self):
+    def salvar(self, path):
         
         from pickle import dumps
         
-        open("data.cccp", 'wb').write(dumps(self))
+        open(f"{path}/data.cccp", 'wb').write(dumps(self))
 
 
     def load_from_text(self, data_dias, data_rank, tempday):
@@ -31,28 +31,28 @@ class Database:
         self.tempday = int(open(tempday, 'r').read())
 
     
-    def dump_to_text(self):
+    def dump_to_text(self, path):
 
         from os import mkdir, getcwd
         from os.path import exists
         
-        saida = getcwd()+"\\data_text_files"
+        saida = path+"/data_text_files"
 
         if not exists(saida):
             mkdir(saida)
 
-        with open(saida+"\\cccp.csv", 'w', encoding="utf-8") as arquivo:
+        with open(saida+"/cccp.csv", 'w', encoding="utf-8") as arquivo:
 
             for A in self.data_dias:
                 arquivo.write(f"{A[0]},{A[1]}\n")
 
-        with open(saida+"\\rank.csv", 'w', encoding="utf-8") as arquivo:
+        with open(saida+"/rank.csv", 'w', encoding="utf-8") as arquivo:
 
             for A in self.data_rank.items():
 
                 arquivo.write(f"{A[0]},{A[1]}\n")
 
-        with open(saida+"\\tempday.txt", "w", encoding="utf-8") as arquivo:
+        with open(saida+"/tempday.txt", "w", encoding="utf-8") as arquivo:
 
             arquivo.write(str(self.tempday))
 
