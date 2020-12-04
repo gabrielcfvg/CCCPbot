@@ -306,6 +306,24 @@ class Comandos:
 
         await send(embed=embed)
 
+    @staticmethod
+    async def arecorde(send):
+
+        data = Dados.tabela_dias()
+        data.sort(key=lambda x: x[1], reverse=False)
+        
+        
+        saida = "```"
+        for A in range(15):
+            temp = str(data[A][0])
+            dia = [f'{temp[6]}{temp[7]}', f'{temp[4]}{temp[5]}', f'{temp[0]}{temp[1]}{temp[2]}{temp[3]}']
+            saida += f'+{str(A+1):<2} - {dia[0]}/{dia[1]}/{dia[2]} === {data[A][1]}\n'
+        saida += "```"
+
+        embed = discord.Embed(title="Anti-Recorde", description="Tabela com os dias menos ativos do servidor")
+        embed.add_field(name='.', value=saida)
+
+        await send(embed=embed)
 
     @staticmethod
     async def backup(send):
@@ -676,6 +694,8 @@ async def parser(message):
 
         elif mensagem.startswith("recorde"): await Comandos.recorde(send)
 
+        elif mensagem.startswith("arecorde"): await Comandos.arecorde(send)
+        
         elif mensagem.startswith("backup"): await Comandos.backup(send)
 
         elif mensagem.startswith("tabela"): await Comandos.tabela(send, mensagem)
